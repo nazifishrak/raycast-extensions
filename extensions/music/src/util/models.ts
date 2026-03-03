@@ -10,6 +10,7 @@ export interface Track {
   artist: string;
   album: string;
   duration: string;
+  favorited?: string;
   state?: PlayerState;
 }
 
@@ -43,4 +44,5 @@ export const ScriptError = {
 
 export interface Preferences {
   volumeSteps: string;
+  disableHUD: boolean;
 }

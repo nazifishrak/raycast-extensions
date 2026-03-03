@@ -176,3 +176,7 @@ yarn.lock
 deno.lock
 bun.lockb
 bun.lock
+
+scripts/internal/**
+.claude**
+.cursor/**

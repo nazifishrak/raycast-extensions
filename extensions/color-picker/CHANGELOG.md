@@ -1,5 +1,31 @@
 # Color Picker Changelog
 
+## [Windows: Enhancement] - 2026-02-13
+
+- Add ability to cancel color picker with Esc key
+- Fix typos
+
+## [Windows Support] - 2026-02-12
+
+- Added Eyedropper and color extractor for Windows using Rust
+- Updated Dependencies
+- Organized folder structure
+
+## [Bugfix & Maintenance] - 2025-08-13
+
+- Fix the incorrect subtitle content in the `Convert Color` command
+- Bump all dependencies to the latest
+
+## [Bugfix] - 2025-06-05
+
+- Add a new callback return value `formattedColor` to return the color in the user's preferred format
+- Fix an issue where the callback hex color was not being returned correctly
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2025-03-10
+
+- Add the color format dropdown option to the `Convert Color` command.
+
 ## [Extract Color] - 2025-02-25
 
 - Select image from finder

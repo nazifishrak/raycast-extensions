@@ -3,11 +3,22 @@ import { execSync } from "node:child_process";
 
 export const MULLVAD_DEVICE_TAG = "tag:mullvad-exit-node";
 
+export type Location = {
+  Country: string;
+  CountryCode: string;
+  City: string;
+  CityCode: string;
+  Latitude: number;
+  Longitude: number;
+  Priority: number;
+};
+
 export interface Device {
   self: boolean;
   key: string;
   name: string;
   userid: string;
+  loginName?: string;
   dns: string;
   ipv4: string;
   ipv6: string;
@@ -16,7 +27,9 @@ export interface Device {
   lastseen: Date;
   exitnode: boolean;
   exitnodeoption: boolean;
+  ssh?: boolean;
   tags?: string[];
+  location?: Location;
 }
 
 export class InvalidPathError extends Error {}
@@ -37,7 +50,10 @@ export type StatusDevice = {
   LastSeen: string;
   UserID: number;
   HostName: string;
+  /** Present when the device advertises Tailscale SSH (sshHostKeys in status --json). */
+  sshHostKeys?: string[];
   Tags?: string[];
+  Location?: Location;
 };
 
 /**
@@ -136,11 +152,13 @@ export function getDevices(status: StatusResponse) {
   const devices: Device[] = [];
   const self = status.Self;
 
+  const selfUser = status.User?.[self.UserID.toString()];
   const me = {
     self: true,
     key: self.ID,
     name: self.DNSName.split(".")[0],
     userid: self.UserID.toString(),
+    loginName: selfUser?.LoginName,
     dns: self.DNSName,
     ipv4: self.TailscaleIPs[0],
     ipv6: self.TailscaleIPs[1],
@@ -149,17 +167,20 @@ export function getDevices(status: StatusResponse) {
     lastseen: new Date(self.LastSeen),
     exitnode: self.ExitNode,
     exitnodeoption: self.ExitNodeOption,
+    ssh: (self.sshHostKeys?.length ?? 0) > 0,
     tags: self.Tags,
   };
 
   devices.push(me);
 
   for (const [, peer] of Object.entries(status.Peer)) {
+    const peerUser = status.User?.[peer.UserID.toString()];
     const device = {
       self: false,
       key: peer.ID,
       name: peer.DNSName.split(".")[0],
       userid: peer.UserID.toString(),
+      loginName: peerUser?.LoginName,
       dns: peer.DNSName,
       ipv4: peer.TailscaleIPs[0],
       ipv6: peer.TailscaleIPs[1],
@@ -168,7 +189,9 @@ export function getDevices(status: StatusResponse) {
       lastseen: new Date(peer.LastSeen),
       exitnode: peer.ExitNode,
       exitnodeoption: peer.ExitNodeOption,
+      ssh: (peer.sshHostKeys?.length ?? 0) > 0,
       tags: peer.Tags,
+      location: peer.Location,
     };
     devices.push(device);
   }
